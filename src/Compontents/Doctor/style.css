@@ -1,0 +1,71 @@
+.trigger {
+  font-size: 18px;
+  line-height: 64px;
+  padding: 0 24px;
+  cursor: pointer;
+  transition: color 0.3s;
+}
+
+.trigger:hover {
+  color: #1890ff;
+}
+.Menu-btn {
+ line-height: 54px;
+  padding:0 28px;
+  background: linear-gradient(to bottom, #3c81ff, #1b77d5)
+}
+.Menu-btn span svg{
+  font-size:24px;
+  color:white;
+}
+.header-s {
+  height: 44px;
+  background: linear-gradient(to bottom, #3c81ff, #1b77d5);
+  position: 'fixed';
+   z-index: 1px;
+    width: '100%' ;
+    display:flex;
+}
+
+
+.header-title{
+    color:white;
+    font-size:22px;
+    line-height:44px;
+}
+.header-info{
+    flex:1;
+    display:flex;
+    justify-content: flex-end;
+    flex-grow: 1;
+    flex-shrink: 1;
+    flex-basis: 0%;
+    margin-right: 25px;
+    color:white;
+    line-height: 44px;
+    font-size:15px;
+}
+.header-info-spMargin{
+  margin-left:20px;
+}
+.header-info-span-span{
+  margin-left:8px;
+}
+.header-info-spMargin svg{
+  font-size:18px;
+}
+ul li span svg{
+  width:20px;
+  height:20px;
+  color:#66AEE2;
+}
+.content{
+  display:flex;
+}
+.content-box{
+  padding:10px;
+  display:flex;
+  flex:1;
+  justify-content: content;
+  background:white;
+}
