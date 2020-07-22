@@ -5,60 +5,66 @@ import axios from 'axios';
 import {
     PlusOutlined,
     SearchOutlined,
-    QuestionCircleTwoTone
 } from '@ant-design/icons'
 import {
     Input,
     Form,
     Select,
     Button,
-    DatePicker,
     Table,
-    Tag,
     Space,
     Modal,
     Switch,
-
+    Pagination,
 } from 'antd';
 import TransferHelpSetListUpdate from '../TransferHelpSetListUpdata/index';
-import TransferHelpSetListInsert from '../TransferHelpSetListInsert';
-import FormItem from 'antd/lib/form/FormItem';
-import index from '../DoctorList';
-import { Link } from 'react-router-dom';
+// import TransferHelpSetListInsert from '../TransferHelpSetListInsert';
 const { Option } = Select
 const { confirm } = Modal
 //修改的
 function showEdit(record, i) {
-
     confirm({
         title: '修改转诊预约跳转地址信息',
-        content: <TransferHelpSetListUpdate record={record} />,
+        content: <TransferHelpSetListUpdate record={record} handleHELP={i.handleHELP.bind(i)} handleSTATUS={i.handleSTATUS.bind(i)} handleTYPE={i.handleTYPE.bind(i)} />,
         okText: "确定",
         cancelText: "取消",
         onOk() {
             axios.post('https://bitnet.519e.com.cn/OnlineConsultationManageTest/api/TransferHelpSet/Edit', {
-                APPREGID: i.state.APPREGID,
+                APPREGID: record.APPREGID,
                 CONTENT: i.state.showHelp,
-                HOSPITALID: i.state.hospitalid,
+                HOSPITALID: record.HOSPITALID,
                 STATUS: i.state.stateCheck,
                 TYPE: i.state.userType,
             }, { headers: { "Tick": window.localStorage.Tick } }
             ).then((res) => {
                 if (res.data.ResultCode === 0) {
+                    let maplist = i.state.data.map(x => {
+                        if (x.APPREGID == record.APPREGID && x.HOSPITALID == record.HOSPITALID) {
+                            return {
+                                ...res.data.Data,
+                                hospitalName: record.hospitalName,
+                            }
+                        }
+                        return x
+                    })
+
                     i.setState({
-                        data: res.data.Data
+                        data: maplist
                     })
                     alert("操作成功")
+                    i.handleSelect();
+
                 } else {
                     alert(res.data.ResultMsg)
                 }
             }).catch((err) => {
-                alert(err.data.msg)
+                alert(err)
             })
         }
 
     })
 }
+const { TextArea } = Input
 //删除
 function ModalDel(record, i) {
     confirm({
@@ -69,6 +75,7 @@ function ModalDel(record, i) {
         onOk() {
             i.setState({
                 delVisible: false,
+                loading:true
             })
             axios.post('https://bitnet.519e.com.cn/OnlineConsultationManageTest/api/TransferHelpSet/Delete', {
                 APPREGID: record.APPREGID,
@@ -76,14 +83,19 @@ function ModalDel(record, i) {
             }, { headers: { "Tick": window.localStorage.Tick } }
             ).then((res) => {
                 if (res.data.ResultCode == 0) {
-                    i.setState({
-                        data: res.data.Data
-                    })
+                     if ((i.state.total % i.state.page) === 1) {
+                            console.log('abc')
+                            i.setState({
+                                NOWPAGE: i.state.NOWPAGE - 1
+                            })
+                        }
                     i.handleSelect();
-                    alert("删除成功！")
+                    alert("删除成功")
                 } else {
                     alert(res.data.ResultMsg)
                 }
+            }).catch((err) => {
+                alert(err);
             })
         }
     })
@@ -99,28 +111,27 @@ class TransferHelpSetList extends Component {
             HOSNAME: '',//医院名称
             userType: "",//用户类型
             showHelp: "",//指引帮助
-            stateCheck: false,//状态switch
+            stateCheck: "",//状态switch
             ListData: [],//医院list数据
             hospitalid: '',//医院编号
             data: [],   //table数据
-            APPREGID: ''//应用编号
+            APPREGID: "",//应用编号
+            NOWPAGE: 1,//当前页数
+            page: 4,//显示多少数据
+            
+            loading:false,//加载状态
         };
         this.handleHosList = this.handleHosList.bind(this);
         this.handleSelectChange = this.handleSelectChange.bind(this);
+        this.handleInsert = this.handleInsert.bind(this);
         this.handleSelect = this.handleSelect.bind(this);
-        this.handleDelBind = this.handleDelBind.bind(this);
-        this.handleEdit = this.handleEdit.bind(this);
-        this.handleDel = this.handleDel.bind(this);
-        this.handleEditBind = this.handleEditBind.bind(this);
     }
     componentDidMount = () => {
         this.handleHosList();
         this.handleSelect();
-
     }
 
     render() {
-        // const data = this.props.data;
 
         const columns = [
             {
@@ -161,39 +172,14 @@ class TransferHelpSetList extends Component {
                 render: (test, record) => (
                     <Space size="middle">
                         <a onClick={() => showEdit(record, this)}>修改</a>
-                        {/* 修改弹框,
-                        这种写法会弹出4个弹框，不可，包括他的传值record，会将所有的数据传递过去 */}
-                        {/* <Modal
-                            okText="确认"
-                            cancelText="取消"
-                            title="修改转诊预约跳转地址信息"
-                            okType="primary"
-                            onOk={this.handleEdit}
-                            onCancel={() => this.handleUpdateVisible(false)}
-                            visible={this.state.updateVisible}
-                        >
-                            
-                            <TransferHelpSetListUpdate record={record} />
-                        </Modal> */}
+
                         <a onClick={() => { ModalDel(record, this) }}>删除</a>
-                        {/* 删除弹框 */}
-                        {/* <Modal
-                            icon={<QuestionCircleTwoTone />}
-                            okText="确认"
-                            cancelText="取消"
-                            title="确认删除？"
-                            okType="primary"
-                            onOk={this.handleDel}
-                            onCancel={() => this.handleDelVisible(false)}
-                            visible={this.state.delVisible}
-                        >
-                            物理删除数据
-                        </Modal> */}
+
 
                     </Space>)
             }
         ];
-
+      
         return (
             <div className='content-ManageBox'>
                 <div className='content-ManageBox-header'>
@@ -202,26 +188,65 @@ class TransferHelpSetList extends Component {
                     </div>
                 </div>
                 <div className='content-ManageBox-body'>
+
                     <Button type="primary" icon={<PlusOutlined />} style={{ marginBottom: 20 }} onClick={() => this.handleInsertVisible(true)}>添加</Button>
-                    {/* 新增的弹框 */}
+
                     <Modal
                         title="新增转诊预约跳转地址信息"
                         okText="确认"
                         cancelText="取消"
                         okType="primary"
+                        maskClosable={false}
                         visible={this.state.insertVisible}
-                        onOk={() => this.handleInsertVisible(false)}
+                        onOk={this.handleInsert.bind(this)}
                         onCancel={() => this.handleInsertVisible(false)}
                     >
-                        {/* //添加form */}
-                        <TransferHelpSetListInsert />
+                        <Form ref='insert'
+                            
+                        //  {...layout}
+                        // onFinish={onFinish}
+                        // onFinishFailed={onFinishFailed}
+                        >
+                            <Form.Item name='HospitalName' label="所属医院" rules={[{ required: true, message: "请输入项为必输项目" }]} >
+                                <Select onChange={this.handleHOSNAME} placeholder="输入搜索或下拉选择">
+                                    {this.state.ListData.map(item => (<Option key={item.HOSPITALID} value={item.HOSPITALID}>{item.HOSNAME}</Option>))}
+                                </Select>
+
+                            </Form.Item>
+                            <Form.Item name='userType' label="用户使用类型" rules={[{ required: true, message: "请输入项为必输项目" }]} >
+                                <Select
+                                    placeholder="输入搜索或下拉选择" onChange={this.handleTYPE}
+                                >
+                                    <Option value="patient">病人端</Option>
+                                    <Option value="staff">医护端</Option>
+
+                                </Select>
+                            </Form.Item>
+
+                            <Form.Item name='appId' label="应用编号" rules={[{ required: true, message: "请输入项为必输项目" }]} >
+                                <Select placeholder="输入搜索或下拉选择" onChange={this.handleAPPID}>
+                                    <Option value="edition001">版本1</Option>
+                                    <Option value="edition002">版本2</Option>
+                                    <Option value="edition003">版本3</Option>
+                                    <Option value="edition004">版本4</Option>
+                                    <Option value="edition005">版本5</Option>
+                                </Select>
+                            </Form.Item>
+                            <Form.Item label="开/关" name="stateCheck">
+                                <Switch checkedChildren="开" unCheckedChildren="关" onChange={this.handleSTATUS} />
+                            </Form.Item>
+                            <Form.Item name='showHelp' label="指引帮助" rules={[{ required: true, message: "请输入项为必输项目" }]} onChange={this.handleHELP}>
+                                <TextArea />
+                            </Form.Item>
+                        </Form>
                     </Modal>
+
                     <div className='content-ManageBox-body-card'>
                         <div className='card-body'>
                             <Form>
                                 <div className='card-form-item'>
                                     <div>
-                                        <Form.Item label="医院：">
+                                        <Form.Item name='HOS' label="医院：">
                                             <Select defaultValue="全部" style={{ width: 140 }} onChange={this.handleSelectChange} >
                                                 <Option value="" key="" selected="">全部</Option>
                                                 {this.state.ListData.map(item => (<Option key={item.HOSPITALID} value={item.HOSPITALID}>{item.HOSNAME}</Option>))}
@@ -230,12 +255,12 @@ class TransferHelpSetList extends Component {
                                     </div>
                                 </div>
                                 <div className='card-form-item' >
-                                    <Form.Item label="urlcode:">
+                                    <Form.Item name='urlcode' label="urlcode:">
                                         <Input />
                                     </Form.Item>
                                 </div>
                                 <div className='card-form-item'>
-                                    <Button type="primary" icon={<SearchOutlined />} onClick={this.handleSelect} >
+                                    <Button type="primary" icon={<SearchOutlined />} onClick={this.handleLook} >
                                         查询
                                     </Button>
                                 </div>
@@ -243,38 +268,102 @@ class TransferHelpSetList extends Component {
                         </div>
                     </div>
                     <div className='content-ManageBox-body-list'>
-                        <Table columns={columns} dataSource={this.state.data} />
+                        <Table columns={columns} dataSource={this.state.data}
+                            loading={this.state.loading}
+                            // pagination={paginationProps}
+                            pagination={{
+                                pageSize: this.state.page,
+                                total: this.state.total,//数据总数
+                                // hideOnSinglePage: true,//只有一页不显示页面跳转
+                                showQuickJumper: false,//快速跳转页面
+                                defaultCurrent: 1,//默认当前页面
+                                current: this.state.NOWPAGE,//当前页面
+                                onChange: (current) => this.handleCurrentPage(current)
+                            }}
+                            
+                        />
+
                     </div>
                 </div>
             </div>
         );
     }
+    handleHOSNAME = (value) => {
+        this.setState({
+            HOSNAME: value
+        })
+    }
+    handleTYPE = (value) => {
+        this.setState({
+            userType: value
+        })
+    }
+    handleSTATUS = (value) => {
+
+        this.setState({
+            stateCheck: value == false ? 0 : 1
+        })
+        console.log(value)
+    }
+    handleAPPID = (value) => {
+        this.setState({
+            APPREGID: value
+        })
+    }
+    handleHELP = (event) => {
+        this.setState({
+            showHelp: event.target.value
+        })
+
+    }
+    handleCurrentPage = (current) => {
+        console.log(current)
+        this.setState({
+            NOWPAGE: current
+        },
+            () => {
+                this.handleSelect();//因为这个是异步查询
+            })
+
+
+    }
+    handleInsert = () => {
+       
+        this.setState({
+            insertVisible: false,
+            loading:true
+        })
+        //0 1
+        axios.post('https://bitnet.519e.com.cn/OnlineConsultationManageTest/api/TransferHelpSet/Add', {
+            APPREGID: this.state.APPREGID,
+            CONTENT: this.state.showHelp,
+            Hospitalid: this.state.HOSNAME,
+            STATUS: this.state.stateCheck,
+            TYPE: this.state.userType,
+        }, {
+            headers: { "Tick": window.localStorage.Tick }
+        }).then((res) => {
+            if (res.data.ResultCode == 0) {
+                this.state.data = res.data.Data;
+                    this.handleSelect();
+                alert("新增成功");
+            } else {
+                alert(res.data.ResultMsg)
+            }
+
+        }).catch((err) => {
+            alert(err);
+        })
+
+    }
     //新增的会话框
     handleInsertVisible(insertVisible) {
+        // this.refs.form.resetFields(); 
         this.setState({
-            insertVisible: insertVisible
+            insertVisible: insertVisible,
+            hospitalid: '',
+            NOWPAGE:1
         })
-    }
-    //修改的会话框
-    handleUpdateVisible(updateVisible) {
-        this.setState({
-            updateVisible: updateVisible
-        })
-    }
-    //删除的会话框
-    handleDelVisible(delVisible) {
-        this.setState({
-            delVisible: delVisible
-        })
-    }
-    //绑定要删除的数据
-    handleDelBind(record) {
-        this.setState({
-            APPREGID: record.APPREGID,
-            hospitalid: record.HOSPITALID,
-            delVisible: true
-        })
-        console.log(record);
     }
     //绑定搜索框选择的医院
     handleSelectChange = (val) => {
@@ -299,20 +388,38 @@ class TransferHelpSetList extends Component {
                 console.log(err)
             })
     }
+    //解决查询后页数没变
+    handleLook = () => { 
+        this.setState({NOWPAGE:1}, () => { this.handleSelect()})
+    }
     //根据医院查询数据
     handleSelect = () => {
+       
         axios.post('https://bitnet.519e.com.cn/OnlineConsultationManageTest/api/TransferHelpSet/GetList', {
             Name: "",
             hospitalid: this.state.hospitalid,
-            page: 0,
-            rows: 10,
+            page: this.state.NOWPAGE - 1,
+            rows: this.state.page,
         }, {
             headers: { "Tick": window.localStorage.Tick }
         }).then((res) => {
             if (res.data.ResultCode == 0) {
+
                 this.setState({
-                    data: res.data.Data
+                    data: res.data.Data,
+                    total: res.data.Total,
+                    loading: false,
                 }
+                    //   判断是否是最后一条数据
+                    , () => {
+                        // if ((this.state.total % this.state.page) === 0) {
+                        //     console.log('abc')
+                        //     this.setState({
+                        //         NOWPAGE: this.state.NOWPAGE - 1
+                        //     })
+                        // }
+                        // console.log(this.state.total % this.state.page,this.state.NOWPAGE)
+                    }
                 )
             }
 
@@ -320,65 +427,7 @@ class TransferHelpSetList extends Component {
             console.log(err)
         })
     }
-    //删除医院数据
-    handleDel = () => {
-        this.setState({
-            delVisible: false,
-        })
-        axios.post('https://bitnet.519e.com.cn/OnlineConsultationManageTest/api/TransferHelpSet/Delete', {
-            APPREGID: this.state.APPREGID,
-            HOSPITALID: this.state.hospitalid
-        }, { headers: { "Tick": window.localStorage.Tick } }
-        ).then((res) => {
-            if (res.data.ResultCode == 0) {
-                this.setState({
-                    data: res.data.Data
-                })
-                this.handleSelect();
-                alert("删除成功！")
-            } else {
-                alert(res.data.ResultMsg)
-            }
-        })
-    }
-    //修改操作
-    handleEdit = () => {
-        this.setState({
-            updateVisible: false,
-        })
 
-        axios.post('https://bitnet.519e.com.cn/OnlineConsultationManageTest/api/TransferHelpSet/Edit', {
-            APPREGID: this.state.APPREGID,
-            CONTENT: this.state.showHelp,
-            HOSPITALID: this.state.hospitalid,
-            STATUS: this.state.stateCheck,
-            TYPE: this.state.userType,
-        }, { headers: { "Tick": window.localStorage.Tick } }
-        ).then((res) => {
-            if (res.data.ResultCode === 0) {
-                this.setState({
-                    data: res.data.Data
-                })
-                alert("操作成功")
-            } else {
-                alert(res.data.ResultMsg)
-            }
-        }).catch((err) => {
-            alert(err.data.ResultMsg)
-        })
-    }
-    //绑定修改的数据
-    handleEditBind(record) {
-        // console.log( record)
-        this.setState({
-            showHelp: record.CONTENT,
-            stateCheck: record.STATUS,
-            userType: record.TYPE,
-            updateVisible: true,
-        })
-        console.log(record)
-
-    }
 }
 
 export default TransferHelpSetList;

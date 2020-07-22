@@ -8,8 +8,6 @@ import {
     Button,
     DatePicker,
     Table,
-    Tag,
-    Space
 } from 'antd';
 import { SearchOutlined, RedoOutlined } from '@ant-design/icons'
 const { RangePicker } = DatePicker;

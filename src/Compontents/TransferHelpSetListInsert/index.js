@@ -1,3 +1,4 @@
+
 import React, { Component } from 'react';
 import TextArea from 'antd/lib/input/TextArea';
 import 'antd/dist/antd.css';
@@ -6,70 +7,77 @@ import {
     Form,
     Select,
     Switch,
-    message
+    message,
+    Modal
 } from 'antd';
-const { Option } = Select;
-
 
 class TransferHelpSetListInsert extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            HospitalName: "",
-            userType: "",
-            appId: "",
-            stateCheck: Boolean,
-            showHelp: "",
             ListData: []
         }
-        this.handleHOSNAME = this.handleHOSNAME.bind(this);
+
         this.handleHosList = this.handleHosList.bind(this);
     }
     componentDidMount = () => {
         this.handleHosList();
     }
     render() {
-        
+
         return (
-            <Form>
-                <Form.Item name='HospitalName' label="所属医院" rules={[{ required: true, message: "请输入项为必输项目" }]}>
-                    <Select onChange={this.handleSelectChange}  placeholder="输入搜索或下拉选择">
-                        {this.state.ListData.map(item => (<Option key={item.HOSPITALID} value={item.HOSPITALID}>{item.HOSNAME}</Option>))}
-                    </Select>
 
-                </Form.Item>
-                <Form.Item name='userType' label="用户使用类型" rules={[{ required: true, message: "请输入项为必输项目"}]}>
-                    <Select
-                        placeholder="输入搜索或下拉选择"
-                    >
-                        <Option value="patient">病人端</Option>
-                        <Option value="staff">医护端</Option>
+            <table>
+                <tr>
+                    <td>所属医院</td>
+                    <td>
+                        <select onChange={this.props.handleHOSNAME}  >
+                            <option value="" disabled selected>输入搜索或下拉选择</option>
+                            {this.state.ListData.map(item => (<option key={item.HOSPITALID} value={item.HOSPITALID}>{item.HOSNAME}</option>))}
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td>用户使用类型</td>
+                    <td>
+                        <select onChange={this.props.handleTYPE} >
+                            <option value="" disabled selected>输入搜索或下拉选择</option>
+                            <option value="patient">病人端</option>
+                            <option value="staff">医护端</option>
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td>应用编号</td>
+                    <td>
+                        <select onChange={this.props.handleAPPID} >
+                            <option value="" disabled selected>输入搜索或下拉选择</option>
+                            <option value="edition001">版本1</option>
+                            <option value="edition002">版本2</option>
+                            <option value="edition003">版本3</option>
+                            <option value="edition004">版本4</option>
+                            <option value="edition005">版本5</option>
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td>开/关</td>
+                    {/* <td>
+                        <input type='radio' value='1'>开</input>
+                        <input type='radio' value='0'>关</input>
+                    </td> */}
+                </tr>
+                <tr>
+                    <td>指引帮助</td>
+                    <td>
+                        <textarea onChange={this.props.handleHELP} />
+                    </td>
+                </tr>
+            </table>
 
-                    </Select>
-                </Form.Item>
 
-                <Form.Item name='appId' label="应用编号" rules={[{ required: true, message: "请输入项为必输项目" }]}>
-                    <Select placeholder="输入搜索或下拉选择">
-                        <Option value="edition001">版本1</Option>
-                        <Option value="edition002">版本2</Option>
-                        <Option value="edition003">版本3</Option>
-                        <Option value="edition004">版本4</Option>
-                        <Option value="edition005">版本5</Option>
-                    </Select>
-                </Form.Item>
-                <Form.Item label="开/关" name="stateCheck">
-                    <Switch checkedChildren="开" unCheckedChildren="关" defaultChecked/>
-                </Form.Item>
-                <Form.Item name='showHelp' label="指引帮助" rules={[{ required: true, message: "请输入项为必输项目" }]}>
-                    <TextArea />
-                </Form.Item>
-            </Form>
+
         );
-    }
-    handleHOSNAME = (e) => {
-        this.setState({
-            HospitalName: e.target.title
-        })
     }
     //医院列表
     handleHosList = () => {
@@ -85,7 +93,8 @@ class TransferHelpSetListInsert extends Component {
                 console.log(err)
             })
     }
-  
+
 }
+
 
 export default TransferHelpSetListInsert;
