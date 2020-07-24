@@ -20,9 +20,8 @@ import {
 
 } from '@ant-design/icons';
 import { Route, Link } from 'react-router-dom';
-import Form from 'antd/lib/form/Form';
+import PersonInfo from './PersonInfo';
 const { SubMenu } = Menu;
-const { Header, Content, Footer, Sider } = Layout;
 const text = "是否确认需要退出?";
 function confirm() {
 
@@ -42,18 +41,21 @@ class Doctor extends React.Component {
         super(props);
         this.state = {
             collapsed: false,
-            data: [],
+            data: [],//
             visible: false,
+            personData:[],//个人信息
+            Phone: '',
+            userCode: '',
+            userName: '',
+            information:"",
+            state: '',
+            roleName: ''
         }
-        // if (this.props.Tick===null) {
-        //     this.props.history.push('/Login')
-        // }
         this.toggleCollapsed = this.toggleCollapsed.bind(this);
         this.handleClick = this.handleClick.bind(this);
         this.handleTransfer = this.handleTransfer.bind(this);
-        // this.showModal = this.showModal.bind(this);
-        // this.handleOk = this.handleOk.bind(this);
-        // this.handleCancel = this.handleCancel.bind(this);
+        this.showModal = this.showModal.bind(this);
+
     }
 
     componentDidMount() {
@@ -87,25 +89,24 @@ class Doctor extends React.Component {
                             </span>
                         </span>
                         <div >
-                            <span className='header-info-spMargin'>
+                            <span className='header-info-spMargin' onClick={this.showModal}>
                                 <i><FileDoneOutlined /></i>
-                                <span className='header-info-span-span'
-                                // onClick={this.showModal}
-                                >个人信息
-                                {/* <Modal
-                                        title="个人信息"
-                                        visible={this.state.visible}
-                                        onOk={this.hideModal}
-                                        onCancel={this.hideModal}
-                                        okText="确认"
-                                        cancelText="取消"
-                                    >
-                                        <p>Some contents...</p>
-                                        <p>Some contents...</p>
-                                        <p>Some contents...</p>
-                                    </Modal> */}
+                                <span className='header-info-span-span' >个人信息
                                 </span>
                             </span>
+                            {/* <PersonInfo visible={this.state.visible} title="个人信息" handleOk={this.handleOk.bind(this)} /> */}
+                            <Modal
+                                visible={this.state.visible}
+                                onOk={this.handleOk.bind(this)}
+                                onCancel={this.handleOk.bind(this)}
+                                title="个人信息"
+                                okText="确认"
+                                cancelText="取消"
+                               centered="true"
+                               
+                            >
+                                <PersonInfo information={this.state.information} />
+                            </Modal>
                         </div>
                         <div >
                             <span className='header-info-spMargin'>
@@ -134,8 +135,6 @@ class Doctor extends React.Component {
                     <div style={
                         this.state.collapsed ? { width: 'auto' } : { width: 200 }}>
                         <Menu
-                            // defaultSelectedKeys={['1']}
-                            // defaultOpenKeys={['sub1']}
                             mode="inline"
                             inlineCollapsed={this.state.collapsed}
 
@@ -182,6 +181,7 @@ class Doctor extends React.Component {
                     </div>
                     <div className='content-box'>
 
+                        
                         <Route exact path='/Doctor/DoctorList'>
                             <DoctorList data={this.state.data} />
                         </Route>
@@ -202,41 +202,36 @@ class Doctor extends React.Component {
 
         });
     };
-    //个人信息弹框
-    // showModal = () => {
-    //     this.setState({
-    //         visible: true,
-    //     });
-    // };
 
-    // hideModal = () => {
-    //     this.setState({
-    //         visible: false,
-    //     });
-    // };
+    //个人信息弹框
+    showModal = () => {
+        this.setState({
+            visible: true,
+        });
+        axios.post('https://bitnet.519e.com.cn/OnlineConsultationManageTest/api/user/GetUserInfo', {
+            rows:10
+        }, { headers: {"Tick": window.localStorage.Tick} }
+        ).then(
+            (res) => {
+                if (res.data.ResultCode === 0) {
+                    this.setState({
+                        information: res.data.Data
+                    })
+                    
+                }
+            }
+        ).catch((err) =>{
+            console.log(err)
+        })
+    };
+    handleOk = () => {
+        this.setState({
+            visible: false
+        })
+
+    }
+
     handleClick() {
-        //该写法与下面效果相同
-        // axios({
-        //     method: 'post',
-        //     url: 'https://bitnet.519e.com.cn/OnlineConsultationManageTest/api/ApiDoctor/GetDoctorRegInfosList',
-        //     headers: { "Tick": window.localStorage.Tick },
-        //     data: {
-        //         page: 1,
-        //         rows: 10,
-        //         SearchName: "",
-        //         hospitalId: "",
-        //         StartDate: "",
-        //         EndDate: "",
-        //         UpdateStartDate: "",
-        //         UpdateEndDate: "",
-        //         HosCheckStatusStr: "",
-        //         HosUpdateCheckStatusStr: "",
-        //         HosIsApply: "",
-        //         DeptIds: "0B696DB943854017A73B49640E42645F"
-        //     }
-        // }).then(res => {
-        //     console.log(res)
-        // })
         axios.post('https://bitnet.519e.com.cn/OnlineConsultationManageTest/api/ApiDoctor/GetDoctorRegInfosList',
             {
                 data: {
@@ -282,7 +277,7 @@ class Doctor extends React.Component {
                 this.setState({
                     data: res.data.Data
                 })
-               
+
             }
         }).catch((err) => {
             console.log(err)

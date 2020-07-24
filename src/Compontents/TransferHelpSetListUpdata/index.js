@@ -24,9 +24,10 @@ class TransferHelpSetListInsert extends Component {
     }
     render() {
         const record = this.props.record;
+        console.log(record)
         return (
             <Form >
-                {console.log(this.props.record)}
+             
                 <Form.Item name='HospitalName' label={"所属医院"} rules={[{ required: true }]} onChange={this.props.handleHOSNAME}>
 
                     <Select disabled="false" defaultValue={record.HOSPITALID} >

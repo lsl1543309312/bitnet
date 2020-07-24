@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component,useRef } from 'react';
 import './style.css'
 import 'antd/dist/antd.css';
 import axios from 'axios';
@@ -21,6 +21,7 @@ import TransferHelpSetListUpdate from '../TransferHelpSetListUpdata/index';
 // import TransferHelpSetListInsert from '../TransferHelpSetListInsert';
 const { Option } = Select
 const { confirm } = Modal
+
 //修改的
 function showEdit(record, i) {
     confirm({
@@ -75,7 +76,7 @@ function ModalDel(record, i) {
         onOk() {
             i.setState({
                 delVisible: false,
-                loading:true
+                loading: true
             })
             axios.post('https://bitnet.519e.com.cn/OnlineConsultationManageTest/api/TransferHelpSet/Delete', {
                 APPREGID: record.APPREGID,
@@ -83,12 +84,12 @@ function ModalDel(record, i) {
             }, { headers: { "Tick": window.localStorage.Tick } }
             ).then((res) => {
                 if (res.data.ResultCode == 0) {
-                     if ((i.state.total % i.state.page) === 1) {
-                            console.log('abc')
-                            i.setState({
-                                NOWPAGE: i.state.NOWPAGE - 1
-                            })
-                        }
+                    if ((i.state.total % i.state.page) === 1) {
+                        console.log('abc')
+                        i.setState({
+                            NOWPAGE: i.state.NOWPAGE - 1
+                        })
+                    }
                     i.handleSelect();
                     alert("删除成功")
                 } else {
@@ -118,8 +119,8 @@ class TransferHelpSetList extends Component {
             APPREGID: "",//应用编号
             NOWPAGE: 1,//当前页数
             page: 4,//显示多少数据
-            
-            loading:false,//加载状态
+
+            loading: false,//加载状态
         };
         this.handleHosList = this.handleHosList.bind(this);
         this.handleSelectChange = this.handleSelectChange.bind(this);
@@ -132,7 +133,6 @@ class TransferHelpSetList extends Component {
     }
 
     render() {
-
         const columns = [
             {
                 title: '序列',
@@ -179,9 +179,10 @@ class TransferHelpSetList extends Component {
                     </Space>)
             }
         ];
-      
+        const form =Form.useForm
         return (
             <div className='content-ManageBox'>
+               
                 <div className='content-ManageBox-header'>
                     <div className='content-ManageBox-header-title'>
                         <span>转诊预约跳转地址管理</span>
@@ -201,19 +202,19 @@ class TransferHelpSetList extends Component {
                         onOk={this.handleInsert.bind(this)}
                         onCancel={() => this.handleInsertVisible(false)}
                     >
-                        <Form ref='insert'
-                            
+                        <Form
+
                         //  {...layout}
                         // onFinish={onFinish}
                         // onFinishFailed={onFinishFailed}
                         >
-                            <Form.Item name='HospitalName' label="所属医院" rules={[{ required: true, message: "请输入项为必输项目" }]} >
+                            <Form.Item name='HospitalName' label="所属医院" rules={[{ required: true, message: "请输入项为必输项目" }]} initialValue='输入搜索或下拉选择'>
                                 <Select onChange={this.handleHOSNAME} placeholder="输入搜索或下拉选择">
                                     {this.state.ListData.map(item => (<Option key={item.HOSPITALID} value={item.HOSPITALID}>{item.HOSNAME}</Option>))}
                                 </Select>
 
                             </Form.Item>
-                            <Form.Item name='userType' label="用户使用类型" rules={[{ required: true, message: "请输入项为必输项目" }]} >
+                            <Form.Item name='userType' label="用户使用类型" rules={[{ required: true, message: "请输入项为必输项目" }]} initialValue='输入搜索或下拉选择'>
                                 <Select
                                     placeholder="输入搜索或下拉选择" onChange={this.handleTYPE}
                                 >
@@ -223,7 +224,7 @@ class TransferHelpSetList extends Component {
                                 </Select>
                             </Form.Item>
 
-                            <Form.Item name='appId' label="应用编号" rules={[{ required: true, message: "请输入项为必输项目" }]} >
+                            <Form.Item name='appId' label="应用编号" rules={[{ required: true, message: "请输入项为必输项目" }]} initialValue='输入搜索或下拉选择'>
                                 <Select placeholder="输入搜索或下拉选择" onChange={this.handleAPPID}>
                                     <Option value="edition001">版本1</Option>
                                     <Option value="edition002">版本2</Option>
@@ -235,7 +236,7 @@ class TransferHelpSetList extends Component {
                             <Form.Item label="开/关" name="stateCheck">
                                 <Switch checkedChildren="开" unCheckedChildren="关" onChange={this.handleSTATUS} />
                             </Form.Item>
-                            <Form.Item name='showHelp' label="指引帮助" rules={[{ required: true, message: "请输入项为必输项目" }]} onChange={this.handleHELP}>
+                            <Form.Item name='showHelp' label="指引帮助" rules={[{ required: true, message: "请输入项为必输项目" }]} onChange={this.handleHELP} initialValue={undefined}>
                                 <TextArea />
                             </Form.Item>
                         </Form>
@@ -279,8 +280,10 @@ class TransferHelpSetList extends Component {
                                 defaultCurrent: 1,//默认当前页面
                                 current: this.state.NOWPAGE,//当前页面
                                 onChange: (current) => this.handleCurrentPage(current)
+
                             }}
-                            
+                            tableLayout='auto'
+
                         />
 
                     </div>
@@ -317,7 +320,7 @@ class TransferHelpSetList extends Component {
 
     }
     handleCurrentPage = (current) => {
-        console.log(current)
+     
         this.setState({
             NOWPAGE: current
         },
@@ -327,13 +330,15 @@ class TransferHelpSetList extends Component {
 
 
     }
-    handleInsert = () => {
-       
+    //新增
+    handleInsert = (e) => {
+        // this.props.form.resetFields();
+        // e.preventDefault(); //取消事件的默认动作
+        
         this.setState({
             insertVisible: false,
-            loading:true
+            loading: true
         })
-        //0 1
         axios.post('https://bitnet.519e.com.cn/OnlineConsultationManageTest/api/TransferHelpSet/Add', {
             APPREGID: this.state.APPREGID,
             CONTENT: this.state.showHelp,
@@ -345,8 +350,9 @@ class TransferHelpSetList extends Component {
         }).then((res) => {
             if (res.data.ResultCode == 0) {
                 this.state.data = res.data.Data;
-                    this.handleSelect();
+                this.handleSelect();
                 alert("新增成功");
+                // this.props.form.resetFields()
             } else {
                 alert(res.data.ResultMsg)
             }
@@ -358,11 +364,13 @@ class TransferHelpSetList extends Component {
     }
     //新增的会话框
     handleInsertVisible(insertVisible) {
-        // this.refs.form.resetFields(); 
+        
+        // this.props.form.resetFields();
         this.setState({
+
             insertVisible: insertVisible,
             hospitalid: '',
-            NOWPAGE:1
+            NOWPAGE: 1
         })
     }
     //绑定搜索框选择的医院
@@ -389,12 +397,12 @@ class TransferHelpSetList extends Component {
             })
     }
     //解决查询后页数没变
-    handleLook = () => { 
-        this.setState({NOWPAGE:1}, () => { this.handleSelect()})
+    handleLook = () => {
+        this.setState({ NOWPAGE: 1 }, () => { this.handleSelect() })
     }
     //根据医院查询数据
     handleSelect = () => {
-       
+
         axios.post('https://bitnet.519e.com.cn/OnlineConsultationManageTest/api/TransferHelpSet/GetList', {
             Name: "",
             hospitalid: this.state.hospitalid,
@@ -411,6 +419,7 @@ class TransferHelpSetList extends Component {
                     loading: false,
                 }
                     //   判断是否是最后一条数据
+                    //这个判断不可用，他会将满页的数据也带入
                     , () => {
                         // if ((this.state.total % this.state.page) === 0) {
                         //     console.log('abc')

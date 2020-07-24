@@ -79,7 +79,7 @@ class Login extends Component {
     handleSubmit(e) {
         //判断字符是否有错
 
-        e.preventDefault();
+        e.preventDefault();//取消默认事件
         //post  非表单传递。
         //登录post from表单
         // let fromData = new FormData()
