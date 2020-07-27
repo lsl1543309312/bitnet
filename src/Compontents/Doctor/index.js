@@ -6,6 +6,8 @@ import { Menu, Button, Layout, Popconfirm, message, Modal, Switch } from 'antd';
 import DoctorList from '../DoctorList';
 import axios from 'axios'
 import TransferHelpSetList from '../../Compontents/TransferHelpSetList'
+import TranfList from '../../router/tranfList'
+import NewCRUD from '../../router/newCRUD'
 import {
     FundProjectionScreenOutlined,
     MenuUnfoldOutlined,
@@ -21,6 +23,7 @@ import {
 } from '@ant-design/icons';
 import { Route, Link } from 'react-router-dom';
 import PersonInfo from './PersonInfo';
+import newCRUD from '../../router/newCRUD';
 const { SubMenu } = Menu;
 const text = "是否确认需要退出?";
 function confirm() {
@@ -43,11 +46,11 @@ class Doctor extends React.Component {
             collapsed: false,
             data: [],//
             visible: false,
-            personData:[],//个人信息
+            personData: [],//个人信息
             Phone: '',
             userCode: '',
             userName: '',
-            information:"",
+            information: "",
             state: '',
             roleName: ''
         }
@@ -102,10 +105,10 @@ class Doctor extends React.Component {
                                 title="个人信息"
                                 okText="确认"
                                 cancelText="取消"
-                               centered="true"
-                               
+                                centered="true"
+
                             >
-                                <PersonInfo information={this.state.information} />
+                                <PersonInfo Information={this.state.information} />
                             </Modal>
                         </div>
                         <div >
@@ -157,6 +160,12 @@ class Doctor extends React.Component {
                                 <Menu.Item key="21"
                                     onClick={this.handleTransfer}>
                                     <Link to='/Doctor/TransferHelpSetList'>渠道转诊指引</Link></Menu.Item>
+                                <Menu.Item key="210"
+                                    onClick={null}>
+                                    <Link to='/Doctor/TransferList'>渠道转诊指引1</Link></Menu.Item>
+                                    <Menu.Item key="211"
+                                    onClick={null}>
+                                    <Link to='/Doctor/newCRUD'>重写的</Link></Menu.Item>
                             </SubMenu>
                             <SubMenu key="sub4" icon={<CarryOutOutlined />} title="流程审批">
                                 <Menu.Item key="8">审批医生</Menu.Item>
@@ -181,7 +190,7 @@ class Doctor extends React.Component {
                     </div>
                     <div className='content-box'>
 
-                        
+
                         <Route exact path='/Doctor/DoctorList'>
                             <DoctorList data={this.state.data} />
                         </Route>
@@ -191,6 +200,13 @@ class Doctor extends React.Component {
                         <Route path='/Doctor/TransferHelpSetList'>
                             <TransferHelpSetList />
                         </Route>
+                        <Route path='/Doctor/TransferList'>
+                            <TranfList />
+                        </Route>
+                        <Route path='/Doctor/newCRUD'>
+                            <NewCRUD/>
+                        </Route>
+
                     </div>
                 </div>
             </Layout>
@@ -209,18 +225,18 @@ class Doctor extends React.Component {
             visible: true,
         });
         axios.post('https://bitnet.519e.com.cn/OnlineConsultationManageTest/api/user/GetUserInfo', {
-            rows:10
-        }, { headers: {"Tick": window.localStorage.Tick} }
+            rows: 10
+        }, { headers: { "Tick": window.localStorage.Tick } }
         ).then(
             (res) => {
                 if (res.data.ResultCode === 0) {
                     this.setState({
                         information: res.data.Data
                     })
-                    
+
                 }
             }
-        ).catch((err) =>{
+        ).catch((err) => {
             console.log(err)
         })
     };

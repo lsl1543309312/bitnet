@@ -130,7 +130,7 @@ class index extends Component {
                         </div>
                     </div>
                     <div className='content-ManageBox-body-list'>
-                    <Table columns={columns} dataSource={data} />
+                        <Table columns={columns} dataSource={data} />
                     </div>
                 </div>
             </div>

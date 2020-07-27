@@ -119,7 +119,6 @@ class TransferHelpSetList extends Component {
             APPREGID: "",//应用编号
             NOWPAGE: 1,//当前页数
             page: 4,//显示多少数据
-
             loading: false,//加载状态
         };
         this.handleHosList = this.handleHosList.bind(this);
