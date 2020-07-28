@@ -12,9 +12,12 @@ import {
     Select,
     Button,
     Table,
-    Space
+    Space,
+    Modal
 } from 'antd';
+
 import NewModal from '../../Compontents/newModal'
+const { confirm } = Modal
 const { Option } = Select
 
 class newCRUD extends Component {
@@ -32,11 +35,93 @@ class newCRUD extends Component {
             hospitalid: '',
             record: {},//修改前的原始数据
             ModalThis: null,
-            APPREGID:'',
-            HOSNAME:'',
-            stateCheck:Boolean,
-            userType:'',
-            ModalData: []
+            APPREGID: '',
+            HOSNAME: '',
+            stateCheck: Boolean,
+            userType: '',
+            ModalType: '',//判断是新增还是修改
+            ModalData: [
+
+                {
+                    id: 'HOSNAME',
+                    type: 'Select',
+                    label: '所属医院',
+                    value: '',
+                    required: true,
+                    onChange: this.handleOnChange,
+                    disabled: true,
+                    placeholder: "请输入搜索或下拉框",
+                    data: []
+                },
+                {
+                    id: 'userType',
+                    type: 'Select',
+                    label: '用户使用类型',
+                    value: '',
+                    required: true,
+                    onChange: this.handleOnChange,
+                    disabled: false,
+                    placeholder: "请输入搜索或下拉框",
+                    data: [{
+                        HOSPITALID: 'patient',
+                        HOSNAME: '病人端'
+                    },
+                    {
+                        HOSPITALID: 'staff',
+                        HOSNAME: '医护端'
+                    }
+                    ]
+                },
+                {
+                    id: 'APPREGID',
+                    type: 'Select',
+                    label: '应用编号',
+                    value: '',
+                    required: true,
+                    onChange: this.handleOnChange,
+                    disabled: true,
+                    placeholder: "请输入搜索或下拉框",
+                    data: [
+                        {
+                            HOSPITALID: 'edition001',
+                            HOSNAME: '版本1'
+                        },
+                        {
+                            HOSPITALID: 'edition002',
+                            HOSNAME: '版本2'
+                        },
+                        {
+                            HOSPITALID: 'edition003',
+                            HOSNAME: '版本3'
+                        },
+                        {
+                            HOSPITALID: 'edition004',
+                            HOSNAME: '版本4'
+                        }, {
+                            HOSPITALID: 'edition005',
+                            HOSNAME: '版本5'
+                        }
+                    ]
+                },
+                {
+                    id: 'stateCheck',
+                    type: 'Checked',
+                    label: '开/关',
+                    value: false,
+                    required: true,
+                    onChange: this.handleOnChange,
+                    disabled: false,
+
+                },
+                {
+                    id: 'showHelp',
+                    type: 'TextArea',
+                    label: '指引帮助',
+                    value: '',
+                    required: true,
+                    onChange: this.handleOnChange,
+                    disabled: false,
+                }]
         }
     }
     componentDidMount = () => {
@@ -87,7 +172,7 @@ class newCRUD extends Component {
                         >修改</a>
 
                         <a
-                            onClick={() => { this.handleDel(record) }}
+                        // onClick={() => { this.handleDel(record,this) }}
                         >删除</a>
 
 
@@ -113,6 +198,7 @@ class newCRUD extends Component {
                         record={this.state.record}
                         onRef={this.handleOnRef}
                         handleHosList={this.handleHosList}
+                        ListData={this.state.ListData}
                     ></NewModal>
                     <div className='content-ManageBox-body-card'>
                         <div className='card-body'>
@@ -120,7 +206,7 @@ class newCRUD extends Component {
                                 <div className='card-form-item'>
                                     <div>
                                         <Form.Item name='HOS' label="医院：">
-                                            <Select defaultValue="全部" style={{ width: 140 }} onChange={this.handleSelectChange} >
+                                            <Select placeholder="全部" style={{ width: 140 }} onChange={this.handleSelectChange} >
                                                 <Option value="" key="" selected="">全部</Option>
                                                 {this.state.ListData.map(item => (<Option key={item.HOSPITALID} value={item.HOSPITALID}>{item.HOSNAME}</Option>))}
                                             </Select>
@@ -149,7 +235,7 @@ class newCRUD extends Component {
                                 // hideOnSinglePage: true,//只有一页不显示页面跳转
                                 showQuickJumper: false,//是否快速跳转页面
                                 defaultCurrent: 1,//默认当前页面
-                                // current: this.state.NOWPAGE,//当前页面
+                                current: this.state.page,//当前页面
                                 onChange: (current) => this.handleCurrentPage(current)
                             }}
                             tableLayout='auto'
@@ -176,8 +262,10 @@ class newCRUD extends Component {
             .then((res) => {
                 if (res.data.ResultCode == 0) {
                     this.setState({
-                        ListData: res.data.Data
+                        ListData: res.data.Data,
+
                     })
+
                 }
 
             }).catch((err) => {
@@ -244,114 +332,72 @@ class newCRUD extends Component {
     }
     //新增
     handleInsert = () => {
-        let { ModalData, ModalThis } = this.state
-        ModalData.map(item => {
-            item.value = ''
-            return item
+        let { ModalData, ModalThis, ListData } = this.state
+        this.setState({
+            ModalType: "Add"
+        })
+        ModalData.forEach(item => {
+            if (item.id == 'showHelp') {
+                item.value =
+                    item.disabled = false
+            }
+            else if (item.id === 'id') {
+                item.value = ""
+                item.disabled = true
+            }
+            else if (item.id == 'APPREGID') {
+                item.value = ''
+                item.disabled = false
+            } else if (item.id == 'HOSNAME') {
+                item.value = ''
+                item.data = ListData
+                item.disabled = false
+            } else if (item.id == 'stateCheck') {
+                item.value = false
+                item.disabled = false
+            } else if (item.id == 'userType') {
+                item.value = ''
+                item.disabled = false
+            }
         })
         this.setState({
             title: '新增',
-            ModalData:[ {
-                id: 'HOSNAME',
-                type: 'Select',
-                label: '所属医院',
-                value:'',
-                required: true,
-                onChange: this.handleOnChange
-            },
-            {
-                id: 'userType',
-                type: 'Select',
-                label: '用户使用类型',
-                value: '',
-                required: true,
-                onChange: this.handleOnChange
-            },
-            {
-                id: 'APPREGID',
-                type: 'Select',
-                label: '应用编号',
-                value: '',
-                required: true,
-                onChange: this.handleOnChange
-            },
-            {
-                id: 'stateCheck',
-                type: 'Checked',
-                label: '开/关',
-                value: '',
-                required: true,
-                onChange: this.handleOnChange
-            },
-            {
-                id: 'showHelp',
-                type: 'TextArea',
-                label: '指引帮助',
-                value: '',
-                required: true,
-                onChange: this.handleOnChange
-            }],
+            ModalData,
         }, () => {
             ModalThis.actionShow();
         })
     }
     //修改
     handleEdit = (record) => {
-        let { ModalData } = this.state
+        let { ModalData ,ListData} = this.state
+        this.setState({
+            ModalType: "edit"
+        })
         ModalData.map(item => {
             if (item.id == 'showHelp') {
                 item.value = record.CONTENT
-            } else if (item.id == 'APPREGID') {
+                item.disabled = false
+            }
+            else if (item.id === 'id') {
+                item.value = "id"
+                item.disabled = true
+            }
+            else if (item.id === 'APPREGID') {
                 item.value = record.APPREGID
-            } else if (item.id == 'HOSNAME') {
+                item.disabled = true
+            } else if (item.id === 'HOSNAME') {
                 item.value = record.HOSPITALID
-            } else if (item.id == 'stateCheck') {
-                item.value = record.STATUS
-            } else if (item.id == 'userType') {
+                item.data = ListData
+                item.disabled = true
+            } else if (item.id === 'stateCheck') {
+                item.value = record.STATUS === 1 ? true : false
+                item.disabled = false
+            } else if (item.id === 'userType') {
                 item.value = record.TYPE
+                item.disabled = false
             }
         })
         this.setState({
-            ModalData:[ {
-                id: 'HOSNAME',
-                type: 'Select',
-                label: '所属医院',
-                value:'',
-                required: true,
-                onChange: this.handleOnChange
-            },
-            {
-                id: 'userType',
-                type: 'Select',
-                label: '用户使用类型',
-                value: '',
-                required: true,
-                onChange: this.handleOnChange
-            },
-            {
-                id: 'APPREGID',
-                type: 'Select',
-                label: '应用编号',
-                value: '',
-                required: true,
-                onChange: this.handleOnChange
-            },
-            {
-                id: 'stateCheck',
-                type: 'Checked',
-                label: '开/关',
-                value: '',
-                required: true,
-                onChange: this.handleOnChange
-            },
-            {
-                id: 'showHelp',
-                type: 'TextArea',
-                label: '指引帮助',
-                value: '',
-                required: true,
-                onChange: this.handleOnChange
-            }],
             record: record,
             title: '修改'
 
@@ -361,50 +407,63 @@ class newCRUD extends Component {
         })
     }
     //删除
-    handleDel = (record) => {
 
-        let { ModalData } = this.state
-        this.setState({
-            title: "确定删除?",
-            ModalData: [
-                {
-                    type :"del",
-                text:'物理删除数据'}
-            ],
-            record: record
-
-        }, () => {
-            let { ModalThis } = this.state
-            ModalThis.actionShow();
-        })
-    }
     //提交
-    //问题：区分 删除 修改 新增 
-    handleSubmit = (e, record) => {
-        let { showHelp, ModalThis } = this.state
-        console.log(record, showHelp)
+    //问题：区分 删除 修改 新增
+    handleSubmit = (e, record, type) => {
+        let { showHelp, ModalThis, stateCheck, userType, APPREGID, HOSNAME } = this.state
+        console.log(record, showHelp, e, APPREGID, HOSNAME)
         ModalThis.handleActionLoad(true)
-        axios.post('https://bitnet.519e.com.cn/OnlineConsultationManageTest/api/TransferHelpSet/Edit', {
-            APPREGID: record.APPREGID,
-            CONTENT: showHelp,
-            HOSPITALID: record.HOSPITALID,
-            STATUS: record.STATUS,
-            TYPE: record.TYPE,
-        }, { headers: { "Tick": window.localStorage.Tick } }
-        ).then((res) => {
-            ModalThis.handleActionLoad(false);
-            if (res.data.ResultCode === 0) {
-                ModalThis.handleBtnCancel();//操作成功，通过cancel关闭Modal
-                alert("操作成功")
-                this.handleCurrentPage(1)
+        if (this.state.ModalType == 'edit') {
+            axios.post('https://bitnet.519e.com.cn/OnlineConsultationManageTest/api/TransferHelpSet/Edit', {
 
-            } else {
-                alert(res.data.ResultMsg)
-            }
-        }).catch((err) => {
-            ModalThis.handleActionLoad(false);
-            alert(err)
-        })
+                APPREGID: record.APPREGID,
+                CONTENT: showHelp,
+                HOSPITALID: record.HOSPITALID,
+                STATUS: stateCheck,
+                TYPE: userType,
+            }, { headers: { "Tick": window.localStorage.Tick } }
+            ).then((res) => {
+                ModalThis.handleActionLoad(false);
+                if (res.data.ResultCode === 0) {
+                    ModalThis.handleBtnCancel();//操作成功，通过cancel关闭Modal
+                    alert("操作成功")
+                    this.handleCurrentPage(1)
+
+                } else {
+                    alert(res.data.ResultMsg)
+                }
+            }).catch((err) => {
+                ModalThis.handleActionLoad(false);
+                alert(err)
+            })
+        } else {
+            axios.post('https://bitnet.519e.com.cn/OnlineConsultationManageTest/api/TransferHelpSet/Add', {
+                APPREGID: this.state.APPREGID,
+                CONTENT: this.state.showHelp,
+                Hospitalid: this.state.HOSNAME,
+                STATUS: this.state.stateCheck,
+                TYPE: this.state.userType,
+            }, {
+                headers: { "Tick": window.localStorage.Tick }
+            }).then((res) => {
+                ModalThis.handleActionLoad(false);
+                if (res.data.ResultCode == 0) {
+                    ModalThis.handleBtnCancel();
+                    this.state.data = res.data.Data;
+                    this.handleSelect();
+                    alert("新增成功");
+                    // this.props.form.resetFields()
+                } else {
+                    alert(res.data.ResultMsg)
+                }
+
+            }).catch((err) => {
+                ModalThis.handleActionLoad(false);
+                alert(err);
+            })
+        }
+
     }
     //Ref
     handleOnRef = (ModalThis) => {
@@ -413,13 +472,25 @@ class newCRUD extends Component {
         })
     }
     handleOnChange = (name, e) => {
-
+        console.log(name, e)
         let { ModalData } = this.state
-        ModalData.forEach(item => {
-            item.value = e.target.value
+        ModalData.map(item => {
+            if (item.id === 'userType') {
+                item.value = e
+                return
+            }
+            else if (item.id === 'APPREGID') {
+                item.value = e
+            } else if (item.id === 'HOSNAME') {
+                item.value = e
+            } else if (item.id === 'stateCheck') {
+                item.value = e
+            } else if (item.id === 'showHelp') {
+                item.value = e.target.value
+            }
         })
         this.setState({
-            [name]: e.target.value,
+            [name]: e,
             ModalData
         })
     }

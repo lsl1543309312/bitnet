@@ -251,6 +251,8 @@ class tranfList extends Component {
         modedata.forEach(item => {
             if (item.id == 'showHelp') {
                 item.value = e.target.value
+            } else if (item.id=='helpstr') {
+                item.value = e.target.value
             }
         })
         this.setState({
