@@ -3,7 +3,7 @@ import './style.css';
 import Logo from '../../Image/download.jpg'
 import '../../../node_modules/antd/dist/antd.css'
 import React, { Component } from 'react';
-import { Form, Input, Button, Checkbox } from 'antd';
+import { Form, Input, Button, Checkbox, Spin } from 'antd';
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
 import axios from 'axios';
 import {Redirect, Router, Route, Link } from 'react-router-dom'
@@ -17,6 +17,7 @@ class Login extends Component {
             user: '',
             pwd: '',
             RememberMe: 0,
+            loading:false
             // redirectToReferrer: false
         }
         this.handleSubmit = this.handleSubmit.bind(this);
@@ -46,7 +47,8 @@ class Login extends Component {
                     <div className="logo"><img src={Logo} /></div>
 
                     
-                        <Form>
+                    <Spin tip='loading' spinning={this.state.loading}>
+                    <Form >
                             <Form.Item name="userName" rules={[{ required: true, message: '账号不能为空' }]}>
                             <Input onChange={this.handleUserChange} ref={(Input) => { this.InputText=Input}} value={this.state.user} prefix={<UserOutlined className="site-form-item-icon" />} placeholder="请输入用户名" />
                             </Form.Item>
@@ -54,10 +56,11 @@ class Login extends Component {
                                 <Input type="password" onChange={this.handlePwdChange} value={this.state.pwd} prefix={<LockOutlined className="site-form-item-icon" />} placeholder="请输入密码" />
                             </Form.Item>
                             <Form.Item >
-                                <Button type='primary' className="login-form-button" htmlType="submit" onClick={this.handleSubmit}>登录</Button>
+                                <Button loading={this.state.loading} type='primary' className="login-form-button" htmlType="submit" onClick={this.handleSubmit}>登录</Button>
                             </Form.Item>
                         </Form>
 
+                        </Spin>
                  
                 </div>
 
@@ -78,7 +81,9 @@ class Login extends Component {
     }
     handleSubmit(e) {
         //判断字符是否有错
-
+        this.setState({
+            loading: true
+        })
         e.preventDefault();//取消默认事件
         //post  非表单传递。
         //登录post from表单
@@ -95,7 +100,9 @@ class Login extends Component {
         ).then((res) => {
             //json  api  res.recode  -100 没有tick tick错误
             //tick  0  localStorage
-            console.log(res)
+            this.setState({
+                loading: false
+            })
             window.localStorage.Tick = res.data.Tick;
             window.localStorage.RoleName = res.data.rolelist[0].text;
             if (res.data.success) {
@@ -109,6 +116,9 @@ class Login extends Component {
             }
         }).catch(err => {
             //  401 tick 
+            this.setState({
+                loading: false
+            })
             console.log(err)
             
         })

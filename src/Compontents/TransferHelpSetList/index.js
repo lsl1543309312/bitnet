@@ -1,4 +1,4 @@
-import React, { Component,useRef } from 'react';
+import React, { Component } from 'react';
 import './style.css'
 import 'antd/dist/antd.css';
 import axios from 'axios';
@@ -15,7 +15,6 @@ import {
     Space,
     Modal,
     Switch,
-    Pagination,
 } from 'antd';
 import TransferHelpSetListUpdate from '../TransferHelpSetListUpdata/index';
 // import TransferHelpSetListInsert from '../TransferHelpSetListInsert';

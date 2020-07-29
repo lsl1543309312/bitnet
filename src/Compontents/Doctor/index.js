@@ -2,12 +2,13 @@ import React from 'react';
 import Pharmacist from '../../Compontents/Pharmacist'
 import 'antd/dist/antd.css';
 import './style.css';
-import { Menu, Button, Layout, Popconfirm, message, Modal, Switch } from 'antd';
+import { Menu, Layout, Popconfirm, Modal } from 'antd';
 import DoctorList from '../DoctorList';
 import axios from 'axios'
 import TransferHelpSetList from '../../Compontents/TransferHelpSetList'
 import TranfList from '../../router/tranfList'
 import NewCRUD from '../../router/newCRUD'
+import FormCRUD from '../../router/formCRUD'
 import {
     FundProjectionScreenOutlined,
     MenuUnfoldOutlined,
@@ -23,7 +24,6 @@ import {
 } from '@ant-design/icons';
 import { Route, Link } from 'react-router-dom';
 import PersonInfo from './PersonInfo';
-import newCRUD from '../../router/newCRUD';
 const { SubMenu } = Menu;
 const text = "是否确认需要退出?";
 function confirm() {
@@ -166,6 +166,9 @@ class Doctor extends React.Component {
                                     <Menu.Item key="211"
                                     onClick={null}>
                                     <Link to='/Doctor/newCRUD'>重写的</Link></Menu.Item>
+                                    <Menu.Item key="212"
+                                    onClick={null}>
+                                    <Link to='/Doctor/formCRUD'>使用form的</Link></Menu.Item>
                             </SubMenu>
                             <SubMenu key="sub4" icon={<CarryOutOutlined />} title="流程审批">
                                 <Menu.Item key="8">审批医生</Menu.Item>
@@ -189,8 +192,6 @@ class Doctor extends React.Component {
                         </Menu>
                     </div>
                     <div className='content-box'>
-
-
                         <Route exact path='/Doctor/DoctorList'>
                             <DoctorList data={this.state.data} />
                         </Route>
@@ -203,10 +204,12 @@ class Doctor extends React.Component {
                         <Route path='/Doctor/TransferList'>
                             <TranfList />
                         </Route>
-                        <Route path='/Doctor/newCRUD'>
+                        <Route exact path='/Doctor/newCRUD'>
                             <NewCRUD/>
                         </Route>
-
+                        <Route exact path='/Doctor/formCRUD'>
+                            <FormCRUD/>
+                        </Route>
                     </div>
                 </div>
             </Layout>

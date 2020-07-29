@@ -17,10 +17,10 @@ import {
     Spin
 } from 'antd';
 
-import NewModal from '../../Compontents/newModal'
+import FormModal from '../../Compontents/formModal'
 const { confirm } = Modal
 const { Option } = Select
-
+//删除
 function ModalDel(record, i) {
     confirm({
         title: '修改转诊预约跳转地址信息',
@@ -55,7 +55,8 @@ function ModalDel(record, i) {
         }
     })
 }
-class newCRUD extends Component {
+
+class formCRUD extends Component {
     constructor(props) {
         super(props)
         this.state = {
@@ -76,7 +77,6 @@ class newCRUD extends Component {
             userType: '',
             ModalType: '',//判断是新增还是修改
             ModalData: [
-
                 {
                     id: 'HOSNAME',
                     type: 'Select',
@@ -86,7 +86,8 @@ class newCRUD extends Component {
                     onChange: this.handleOnChange,
                     disabled: true,
                     placeholder: "请输入搜索或下拉框",
-                    data: []
+                    data: [],
+                    message:"请输入项为必输项目"
                 },
                 {
                     id: 'userType',
@@ -94,6 +95,7 @@ class newCRUD extends Component {
                     label: '用户使用类型',
                     value: '',
                     required: true,
+                    message:"请输入项为必输项目",
                     onChange: this.handleOnChange,
                     disabled: false,
                     placeholder: "请输入搜索或下拉框",
@@ -113,6 +115,7 @@ class newCRUD extends Component {
                     label: '应用编号',
                     value: '',
                     required: true,
+                    message:"请输入项为必输项目",
                     onChange: this.handleOnChange,
                     disabled: true,
                     placeholder: "请输入搜索或下拉框",
@@ -143,10 +146,10 @@ class newCRUD extends Component {
                     type: 'Checked',
                     label: '开/关',
                     value: false,
-                    required: true,
                     onChange: this.handleOnChange,
                     disabled: false,
-
+                    checked: '开',
+                    unchecked:'关'
                 },
                 {
                     id: 'showHelp',
@@ -154,6 +157,7 @@ class newCRUD extends Component {
                     label: '指引帮助',
                     value: '',
                     required: true,
+                    message:"请输入项为必输项目",
                     onChange: this.handleOnChange,
                     disabled: false,
                 }]
@@ -163,6 +167,7 @@ class newCRUD extends Component {
         this.handleGetList()//table数据
         this.handleHosList()//医生list数据
     }
+
     render() {
         const columns = [
             {
@@ -202,21 +207,12 @@ class newCRUD extends Component {
                 dataIndex: 'operation',
                 render: (test, record) => (
                     <Space size="middle">
-                        <a
-                            onClick={() => this.handleEdit(record)}
-                        >修改</a>
-
-                        <a
-                            onClick={() => { ModalDel(record, this) }}
-                        >删除</a>
-
-
+                        <a onClick={() => this.handleEdit(record)}>修改</a>
+                        <a onClick={() => { ModalDel(record, this) }}>删除</a>
                     </Space>)
             }
         ];
-
         return (
-
             <div className='content-ManageBox'>
 
                 <Spin tip="loading" spinning={this.state.loading}>
@@ -228,7 +224,7 @@ class newCRUD extends Component {
                     <div className='content-ManageBox-body' >
 
                         <Button type="primary" icon={<PlusOutlined />} style={{ marginBottom: 20 }} onClick={() => this.handleInsert()}>添加</Button>
-                        <NewModal
+                        <FormModal
                             type={this.state.ModalType}
                             title={this.state.title}
                             handleOk={this.handleSubmit}
@@ -236,7 +232,7 @@ class newCRUD extends Component {
                             record={this.state.record}
                             onRef={this.handleOnRef}
                             ListData={this.state.ListData}
-                        ></NewModal>
+                        ></FormModal>
                         <div className='content-ManageBox-body-card'>
                             <div className='card-body'>
                                 <Form>
@@ -258,7 +254,7 @@ class newCRUD extends Component {
                                     <div className='card-form-item'>
                                         <Button type="primary" icon={<SearchOutlined />} onClick={this.handleLook} >
                                             查询
-                                    </Button>
+                                </Button>
                                     </div>
                                 </Form>
                             </div>
@@ -285,8 +281,7 @@ class newCRUD extends Component {
 
                     </div></Spin>
             </div>
-
-        );
+        )
     }
     //绑定搜索框选择的医院
     handleSelectChange = (val) => {
@@ -379,11 +374,9 @@ class newCRUD extends Component {
         })
         ModalData.forEach(item => {
             if (item.id == 'showHelp') {
-                item.value =''
-                    item.disabled = false
-            }
-        
-            else if (item.id == 'APPREGID') {
+                item.value = ''
+                item.disabled = false
+            }else if (item.id == 'APPREGID') {
                 item.value = ''
                 item.disabled = false
             } else if (item.id == 'HOSNAME') {
@@ -402,10 +395,9 @@ class newCRUD extends Component {
             title: '新增',
             ModalData,
         }, () => {
-            ModalThis.actionShow();
+            ModalThis.handleActionShow();
         })
     }
-    //修改
     handleEdit = (record) => {
         let { ModalData, ListData } = this.state
         this.setState({
@@ -437,19 +429,16 @@ class newCRUD extends Component {
 
         }, () => {
             let { ModalThis } = this.state
-            ModalThis.actionShow();
+            ModalThis.handleActionShow();
         })
     }
-
     //提交
-    //问题：区分 删除 修改 新增
-    handleSubmit = (e, record) => {
-        let { showHelp, ModalThis, stateCheck, userType, APPREGID, HOSNAME } = this.state
-        console.log(record, showHelp, e, APPREGID, HOSNAME)
+    handleSubmit = (record) => {
+        let { ModalThis, showHelp, stateCheck, userType } = this.state
         ModalThis.handleActionLoad(true)
-        if (this.state.ModalType == 'edit') {
+        if (this.state.ModalType === 'edit') {
             axios.post('https://bitnet.519e.com.cn/OnlineConsultationManageTest/api/TransferHelpSet/Edit', {
-                APPREGID: record.APPREGID,
+                APPREGID: record.APPREGID,//不更改
                 CONTENT: showHelp === '' ? record.CONTENT : showHelp,
                 HOSPITALID: record.HOSPITALID,
                 STATUS: stateCheck === true ? 1 : 0,
@@ -461,7 +450,6 @@ class newCRUD extends Component {
                     ModalThis.handleBtnCancel();//操作成功，通过cancel关闭Modal
                     alert("操作成功")
                     this.handleGetList()
-
                 } else {
                     alert(res.data.ResultMsg)
                 }
@@ -493,9 +481,8 @@ class newCRUD extends Component {
                 alert(err);
             })
         }
-
     }
-    //Ref
+    //ref
     handleOnRef = (ModalThis) => {
         this.setState({
             ModalThis
@@ -503,73 +490,6 @@ class newCRUD extends Component {
     }
     handleOnChange = (name, e) => {
         console.log(name, e)
-        let { ModalData } = this.state
-
-        if (name === 'showHelp') {
-            {
-                ModalData.forEach(item => {
-                    if (item.id == 'showHelp') {
-                        item.value = e.target.value
-                    }
-                })
-            }
-            this.setState({
-                [name]: e.target.value,
-                ModalData
-            })
-        }
-
-        else if (name === 'APPREGID') {
-            {
-                ModalData.forEach(item => {
-                    if (item.id == 'APPREGID') {
-                        item.value = e
-                    }
-                })
-            }
-            this.setState({
-                [name]: e,
-                ModalData
-            })
-        } else if (name === 'HOSNAME') {
-            {
-                ModalData.forEach(item => {
-                    if (item.id == 'HOSNAME') {
-                        item.value = e
-                    }
-                })
-            }
-            this.setState({
-                [name]: e,
-                ModalData
-            })
-        } else if (name === 'stateCheck') {
-            {
-                ModalData.forEach(item => {
-                    if (item.id == 'stateCheck') {
-                        item.value = e
-                    }
-                })
-            }
-            this.setState({
-                [name]: e,
-                ModalData
-            })
-        } else if (name === 'userType') {
-            {
-                ModalData.forEach(item => {
-                    if (item.id == 'userType') {
-                        item.value = e
-                    }
-                })
-            }
-            this.setState({
-                [name]: e,
-                ModalData
-            })
-        }
-
     }
 }
-
-export default newCRUD;
+export default formCRUD
